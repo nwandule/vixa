@@ -1,0 +1,117 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- LEFT PANEL -->
+    <div class="col-lg-3 mb-4">
+      <button 
+        class="btn btn-outline-dark w-100 d-lg-none mb-3" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#leftPanelContent" 
+        aria-expanded="false" 
+        aria-controls="leftPanelContent">
+        Show Info
+      </button>
+
+      <div class="collapse d-lg-block" id="leftPanelContent">
+        <app-contact-card></app-contact-card>
+        <app-info-card (openModal)="openModal($event)"></app-info-card>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="col-lg-9">
+      <div class="head-wrap p-3 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+<h3 class="mb-3 mb-md-0" 
+    (dblclick)="isAdmin ? logout() : openLoginModal()">
+  Hello Vixa
+</h3>
+
+          <input 
+            type="text" 
+            class="form-control w-100 w-md-25" 
+            placeholder="Search Product"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange($event)">
+        </div>
+      </div>
+
+      <div class="head-wrap p-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+          <h5 class="mb-3 mb-md-0">Available Products</h5>
+          <button class="btn btn-dark mb-3 mb-md-0" (click)="openModal('quote')">Get a Quote</button>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="mb-4 d-flex flex-wrap gap-2">
+          <button class="btn btn-outline-secondary" (click)="toggleQuotes(false)">All</button>
+          <button class="btn btn-outline-secondary" (click)="toggleQuotes(true)">Quotes</button>
+          <button class="btn btn-outline-secondary" *ngIf="isAdmin" (click)="goToMyOrders()">My Order</button>
+        </div>
+
+        <!-- Product List -->
+        <div class="row g-4">
+          <!-- For Admin Users -->
+          <ng-container *ngIf="isAdmin">
+            <div class="col-sm-6 col-md-4 col-lg-3" *ngFor="let product of filteredProducts; let i = index">
+              <app-admin-product-card
+                [product]="product"
+                [index]="i"
+                (editEvent)="openModal('admin', $event)"
+                (deleteEvent)="deleteProduct($event)">
+              </app-admin-product-card>
+            </div>
+          </ng-container>
+          
+          <!-- For Regular Users -->
+          <ng-container *ngIf="!isAdmin">
+            <div class="col-sm-6 col-md-4 col-lg-3" *ngFor="let product of filteredProducts; let i = index">
+              <app-product-card
+                [product]="product"
+                [index]="i"
+                [isAdmin]="isAdmin"
+                (openModalEvent)="openModal($event.mode, $event.product)">
+              </app-product-card>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-3 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProductModalLabel">
+          {{ currentModalMode === 'quote' ? 'Get a Quote' : 'Place an Order' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <app-product-modal
+          [mode]="currentModalMode"
+          [selectedProduct]="selectedProduct"
+          (productSaved)="addProduct($event)">
+        </app-product-modal>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div #loginModal class="modal fade" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-3 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">Admin Login</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <app-login (loginSuccess)="onLoginSuccess()"></app-login>
+      </div>
+    </div>
+  </div>
+</div>
